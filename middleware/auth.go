@@ -4,87 +4,40 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	myjwt "github.com/Sharykhin/gl-mail-api/pkg/jwt"
 	"net/http"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/Sharykhin/gl-mail-api/service"
+	"github.com/Sharykhin/gl-mail-api/util"
 )
 
-const ADMIN_ROLE = "admin"
-const PUBLICKEY = "public.pem"
 
+//JWTAuth middleware checks whether the jwt token was passed through Authorization header
 func JWTAuth(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if r := recover(); r != nil {
-				log.Printf("Catch panic. Error: %s", r)
-				service.SendResponse(service.Response{
-					Success: false,
-					Data:    nil,
-					Error:   http.StatusText(http.StatusUnauthorized),
-				}, w, http.StatusUnauthorized)
-				return
-			}
-		}()
 
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			service.SendResponse(service.Response{
+			util.SendResponse(util.Response{
 				Success: false,
 				Data:    nil,
-				Error:   http.StatusText(http.StatusUnauthorized),
+				Error:   "Authorization header was not provided",
 			}, w, http.StatusUnauthorized)
 			return
 		}
 
-		isMailAuth := strings.HasPrefix(authHeader, "Mail ")
 		isBearerAuth := strings.HasPrefix(authHeader, "Bearer ")
-
-		if isMailAuth {
-			token := authHeader[len("Mail "):]
-
-			payload, err := myjwt.Decode(token, myjwt.SECRET)
-			if err != nil {
-				service.SendResponse(service.Response{
-					Success: false,
-					Data:    nil,
-					Error:   http.StatusText(http.StatusUnauthorized),
-				}, w, http.StatusUnauthorized)
-				return
-			}
-
-			id := payload.(myjwt.Payload).Public.(map[string]interface{})["id"]
-			if id != nil && id != "" {
-				h.ServeHTTP(w, r)
-				return
-			} else {
-				service.SendResponse(service.Response{
-					Success: false,
-					Data:    nil,
-					Error:   http.StatusText(http.StatusUnauthorized),
-				}, w, http.StatusUnauthorized)
-				return
-			}
-		}
 
 		if isBearerAuth {
 			tokenString := authHeader[len("Bearer "):]
-			publicKey, err := ioutil.ReadFile(PUBLICKEY)
+			publicKey, err := ioutil.ReadFile("public.pem")
 			if err != nil {
-				log.Panic(err)
+				log.Fatalf("Could not read public.pem file: %v", err)
 			}
 
 			publicRSA, err := jwt.ParseRSAPublicKeyFromPEM(publicKey)
 			if err != nil {
-				log.Println(err)
-				service.SendResponse(service.Response{
-					Success: false,
-					Data:    nil,
-					Error:   http.StatusText(http.StatusInternalServerError),
-				}, w, http.StatusInternalServerError)
-				return
+				log.Fatalf("could not parse public key: %s. %v", publicKey, err)
 			}
 
 			token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
@@ -95,28 +48,51 @@ func JWTAuth(h http.Handler) http.Handler {
 				return publicRSA, err
 			})
 
+			if err != nil {
+				util.SendResponse(util.Response{
+					Success: false,
+					Data:    nil,
+					Error:   err.Error(),
+				}, w, http.StatusUnauthorized)
+				return
+			}
+
 			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-				log.Println(claims)
-				role := claims["role"]
-				if role == ADMIN_ROLE {
-					h.ServeHTTP(w, r)
-					return
+				if role, ok := claims["role"]; ok {
+					if role == "admin" {
+						h.ServeHTTP(w, r)
+						return
+					} else {
+						util.SendResponse(util.Response{
+							Success: false,
+							Data:    nil,
+							Error:   http.StatusText(http.StatusForbidden),
+						}, w, http.StatusForbidden)
+						return
+					}
 				} else {
-					service.SendResponse(service.Response{
+					util.SendResponse(util.Response{
 						Success: false,
 						Data:    nil,
-						Error:   http.StatusText(http.StatusForbidden),
-					}, w, http.StatusForbidden)
+						Error:   "Payload does not contain role attribute",
+					}, w, http.StatusUnauthorized)
 					return
 				}
 			} else {
-				service.SendResponse(service.Response{
+				util.SendResponse(util.Response{
 					Success: false,
 					Data:    nil,
 					Error:   http.StatusText(http.StatusUnauthorized),
 				}, w, http.StatusUnauthorized)
 				return
 			}
+		} else {
+			util.SendResponse(util.Response{
+				Success: false,
+				Data:    nil,
+				Error:   "Authorization header must have Bearer type",
+			}, w, http.StatusUnauthorized)
+			return
 		}
 	})
 }
