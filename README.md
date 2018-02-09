@@ -18,5 +18,5 @@ openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
 ```
 
 Go to [jwt.io](https://jwt.io/)  
-Select RS256 ALG and put private and public keys. Increase exp if necessary and put role "admin" into a payload.
+Select RS256 ALG and put private and public keys. Increase exp if necessary and put `role` with `admin` value into a payload.
 Copy token and paste it into a request.
