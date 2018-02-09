@@ -21,7 +21,7 @@ func JWTAuth(h http.Handler) http.Handler {
 			util.SendResponse(util.Response{
 				Success: false,
 				Data:    nil,
-				Error:   "Authorization header was not provided",
+				Error:   "authorization header was not provided",
 			}, w, http.StatusUnauthorized)
 			return
 		}
@@ -74,8 +74,8 @@ func JWTAuth(h http.Handler) http.Handler {
 					util.SendResponse(util.Response{
 						Success: false,
 						Data:    nil,
-						Error:   "Payload does not contain role attribute",
-					}, w, http.StatusUnauthorized)
+						Error:   http.StatusText(http.StatusForbidden),
+					}, w, http.StatusForbidden)
 					return
 				}
 			} else {
@@ -90,7 +90,7 @@ func JWTAuth(h http.Handler) http.Handler {
 			util.SendResponse(util.Response{
 				Success: false,
 				Data:    nil,
-				Error:   "Authorization header must have Bearer type",
+				Error:   "authorization header must have Bearer type",
 			}, w, http.StatusUnauthorized)
 			return
 		}
