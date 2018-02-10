@@ -2,17 +2,40 @@ package util
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
+// Response struct represents base response format
 type Response struct {
 	Success bool        `json:"success"`
 	Data    interface{} `json:"data"`
-	Error   string      `json:"error"`
+	Error   error       `json:"error"`
 }
 
+// SendResponse send json response to a client
 func SendResponse(r Response, w http.ResponseWriter, status int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(r)
+	err := json.NewEncoder(w).Encode(r)
+	if err != nil {
+		log.Fatalf("could not return response, struct: %v, error: %v", r, err)
+	}
+}
+
+// MarshalJSON implement MarshalJSON interface method to convert error type to string
+func (res Response) MarshalJSON() ([]byte, error) {
+	var err interface{}
+	if res.Error != nil {
+		err = res.Error.Error()
+	}
+	return json.Marshal(&struct {
+		Success bool        `json:"success"`
+		Data    interface{} `json:"data"`
+		Error   interface{} `json:"error"`
+	}{
+		Success: res.Success,
+		Data:    res.Data,
+		Error:   err,
+	})
 }

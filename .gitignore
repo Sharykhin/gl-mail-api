@@ -1,2 +1,4 @@
 .idea
 public.pem
+jwtRS256.key
+jwtRS256.key.pub

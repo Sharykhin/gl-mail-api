@@ -2,6 +2,8 @@ FROM golang:1.9
 
 ENV APP_ENV $app_env
 
+ENV PUBLIC_KEY=public.pem
+
 ADD . /go/src/github.com/Sharykhin/gl-mail-api
 
 WORKDIR /go/src/github.com/Sharykhin/gl-mail-api

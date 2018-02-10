@@ -1,13 +1,20 @@
 package handler
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+
+	"github.com/Sharykhin/gl-mail-api/util"
+)
 
 func pong(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("pong"))
+	_, err := w.Write([]byte("pong"))
+	if err != nil {
+		log.Fatalf("something really akward went wrong: %v", err)
+	}
 }
 
 func failedMailsList(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	util.SendResponse(util.Response{Success: true, Data: nil, Error: nil}, w, http.StatusOK)
 }
