@@ -18,15 +18,6 @@ func JWTAuth(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			util.SendResponse(util.Response{
-				Success: false,
-				Data:    nil,
-				Error:   fmt.Errorf("authorization header was not provided"),
-			}, w, http.StatusUnauthorized)
-			return
-		}
-
 		isBearerAuth := strings.HasPrefix(authHeader, "Bearer ")
 
 		if isBearerAuth {
@@ -88,10 +79,11 @@ func JWTAuth(h http.Handler) http.Handler {
 			}, w, http.StatusUnauthorized)
 			return
 		}
+
 		util.SendResponse(util.Response{
 			Success: false,
 			Data:    nil,
-			Error:   fmt.Errorf("authorization header must have Bearer type"),
+			Error:   fmt.Errorf(http.StatusText(http.StatusUnauthorized)),
 		}, w, http.StatusUnauthorized)
 	})
 }

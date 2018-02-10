@@ -31,7 +31,12 @@ docker build -t gl-mail-api .
 
 2. Run a container:
 ```bash
-docker run -p 8082:8082 gl-mail-api --rm gl-mail-api
+docker run -p 8002:8002 --name gl-mail-api-service --rm gl-mail-api
+```
+
+If necessary use env variable to switch public key:
+```bash
+docker run --env PUBLIC_KEY=jwtRS256.key.pub -p 8002:8002 --name gl-mail-api-service --rm gl-mail-api
 ```
 
 Dockerfile exposes `8002` port.
