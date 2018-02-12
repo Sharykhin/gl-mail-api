@@ -41,7 +41,7 @@ docker run --name mysqldb -v /my/own/datadir/.docker-runtime/mysqldb:/var/lib/my
 
 4. Run golang container. Use appropriate env variables:
 ```bash
-docker run --env PUBLIC_KEY=jwtRS256.key.pub MYSQL_SOURCE="root:root@tcp(172.17.0.2:3306)/test-db" -p 8002:8002 --name gl-mail-api-service --rm gl-mail-api
+docker run --env PUBLIC_KEY=jwtRS256.key.pub MYSQL_SOURCE="root:root@tcp(172.17.0.2:3306)/test" -p 8002:8002 --name gl-mail-api-service --rm gl-mail-api
 ```
 
 Dockerfile exposes `8002` port.
