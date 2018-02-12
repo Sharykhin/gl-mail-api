@@ -2,3 +2,6 @@
 public.pem
 jwtRS256.key
 jwtRS256.key.pub
+.env
+.docker-runtime/mysqldb/*
+!.docker-runtime/mysqldb/.gitkeep

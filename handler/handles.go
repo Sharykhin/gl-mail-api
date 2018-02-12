@@ -4,6 +4,10 @@ import (
 	"log"
 	"net/http"
 
+	"encoding/json"
+
+	"github.com/Sharykhin/gl-mail-api/controller"
+	"github.com/Sharykhin/gl-mail-api/entity"
 	"github.com/Sharykhin/gl-mail-api/util"
 )
 
@@ -15,6 +19,26 @@ func pong(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func failedMailsList(w http.ResponseWriter, r *http.Request) {
+func getFailedMailsList(w http.ResponseWriter, r *http.Request) {
 	util.SendResponse(util.Response{Success: true, Data: nil, Error: nil}, w, http.StatusOK)
+}
+
+func createFailedMail(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+
+	var mr entity.MessageRequest
+	err := decoder.Decode(&mr)
+	if err != nil {
+		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
+		return
+	}
+
+	m, err := controller.Create(r.Context(), mr)
+	if err != nil {
+		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusInternalServerError)
+		return
+	}
+
+	util.SendResponse(util.Response{Success: true, Data: m, Error: nil}, w, http.StatusCreated)
 }
