@@ -25,7 +25,7 @@ func getFailedMailsList(w http.ResponseWriter, r *http.Request) {
 
 func createFailedMail(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	defer r.Body.Close()
+	defer r.Body.Close() // nolint: errcheck
 
 	var mr entity.MessageRequest
 	err := decoder.Decode(&mr)

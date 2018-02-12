@@ -7,7 +7,7 @@ import (
 	"github.com/Sharykhin/gl-mail-api/entity"
 )
 
-// Creates creates a new failed mail entity
+// Create creates a new failed mail entity
 func Create(ctx context.Context, m entity.MessageRequest) (*entity.Message, error) {
 	return db.Create(ctx, m)
 }

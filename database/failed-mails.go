@@ -11,7 +11,7 @@ import (
 	"encoding/json"
 
 	"github.com/Sharykhin/gl-mail-api/entity"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // dependency of mysql
 )
 
 var db *sql.DB
@@ -19,6 +19,7 @@ var db *sql.DB
 func init() {
 	var err error
 	dbSource := os.Getenv("MYSQL_SOURCE")
+	fmt.Println("MYSQL", dbSource)
 	db, err = sql.Open("mysql", dbSource)
 	if err != nil {
 		log.Fatalf("could not connect to mysql, source: %s, error: %v", dbSource, err)
