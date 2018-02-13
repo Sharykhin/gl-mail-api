@@ -24,11 +24,18 @@ func getFailedMailsList(w http.ResponseWriter, r *http.Request) {
 }
 
 func createFailedMail(w http.ResponseWriter, r *http.Request) {
+	var mr entity.MessageRequest
+
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close() // nolint: errcheck
 
-	var mr entity.MessageRequest
 	err := decoder.Decode(&mr)
+	if err != nil {
+		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
+		return
+	}
+
+	err = validate(mr)
 	if err != nil {
 		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
 		return
@@ -41,4 +48,8 @@ func createFailedMail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	util.SendResponse(util.Response{Success: true, Data: m, Error: nil}, w, http.StatusCreated)
+}
+
+func validate(v entity.InputValidation) error {
+	return v.Validate()
 }
