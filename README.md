@@ -30,17 +30,23 @@ Copy token and paste it into a request.
 Usage:
 ------
 
-1. Build images:
+1. Go to .docker/golang and .docker/mysql and copy .env.example to .env
+```bash
+cd .docker/golang && cp .env.example .env
+cd .docker/mysqk && cp .env.example .env
+```
+
+2. Build images:
 ```bash
 docker-compose build
 ```
 
-2. Run containers:
+4. Run containers:
 ```bash
 docker-compose up
 ```
 
-3. Go to http://localhost:8082
+5. Go to http://localhost:8082
 
 *Examples:*  
 
