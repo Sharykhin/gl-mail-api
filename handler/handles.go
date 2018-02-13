@@ -31,16 +31,17 @@ func createFailedMail(w http.ResponseWriter, r *http.Request) {
 
 	err := decoder.Decode(&mr)
 	if err != nil {
+		log.Printf("could not decode income request to struct: %s, error: %v", mr, err)
 		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
 		return
 	}
-
+	// TODO: this one should be mocked
 	err = validate(mr)
 	if err != nil {
 		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
 		return
 	}
-
+	// TODO: this one should be mocked
 	m, err := controller.Create(r.Context(), mr)
 	if err != nil {
 		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusInternalServerError)
