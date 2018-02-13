@@ -1,6 +1,3 @@
-FROM bitnami/mariadb:10.1
+FROM mysql:5.7
 
-USER 1001
-ENTRYPOINT ["/app-entrypoint.sh"]
-
-CMD ["/run.sh"]
+COPY ./schema.sql /docker-entrypoint-initdb.d

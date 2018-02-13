@@ -1,0 +1,28 @@
+version: "2.1"
+
+services:
+  golang:
+    container_name: gl-mail-api-golang
+    image: gl-mail-api-golang
+    build:
+      context: .
+      dockerfile: .docker/golang/Dockerfile
+    env_file:
+      - ./.docker/golang/.env
+    #environment:
+    #  - MYSQL_SOURCE=test:test@tcp(mysql:3306)/test
+    links:
+      - mysql
+    depends_on:
+      - mysql
+    ports:
+      - "8002:8002"
+
+  mysql:
+    container_name: gl-mail-api-mysql
+    image: gl-mail-api-mysql
+    build: .docker/mysql
+    env_file:
+      - ./.docker/mysql/.env
+    ports:
+      - "3307:3306"

@@ -8,6 +8,12 @@ Requirements:
 
 [docker](https://www.docker.com/)
 
+Technologies:
+-------------
+
+[golang 1.9](https://golang.org/)  
+[mysql 5.7](https://dev.mysql.com)  
+
 Testing:
 -------
 Generate key-pair:
@@ -24,110 +30,30 @@ Copy token and paste it into a request.
 Usage:
 ------
 
-1. Build an image from Dockerfile:
+1. Build images:
 ```bash
-docker build -t gl-mail-api .
+docker-compose build
 ```
 
-2. Get mysql container (skip if mysql container already exists):
+2. Run containers:
 ```bash
-docker pull mysql
+docker-compose up
 ```
 
-3. Run mysql:
+3. Go to http://localhost:8082
+
+*Examples:*  
+
+Health-check
 ```bash
-docker run --name mysqldb -v /my/own/datadir/.docker-runtime/mysqldb:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -d mysql:5.7
+curl -XGET http://localhost:8002/ping
 ```
 
-4. Run golang container. Use appropriate env variables:
+Create a new failed mail message
 ```bash
-docker run --env PUBLIC_KEY=jwtRS256.key.pub MYSQL_SOURCE="root:root@tcp(172.17.0.2:3306)/test" -p 8002:8002 --name gl-mail-api-service --rm gl-mail-api
+curl -XPOST -H "Content-Type: application/json" -d '{"action":"register", "payload":{"to":"unknown@mail.com"}, "reason":"no such mailbox"}' http://localhost:8002/failed-mails
 ```
 
-Dockerfile exposes `8002` port.
 
-5. Go to http://localhost:8082
+[API Documentation](./doc/api.md)
 
-API:
-----
-
-#### Ping:
-
-Some kind of health check endpoint
-
-```bash
-GET /ping
-Status: 200 OK
-```
-
-**Response:**
-
-Headers:
-```bash
-Content-Type: text/plain; charset=utf-8
-```
-
-Body:
-```bash
-OK
-```
-
-#### Get Failed Mails:
-
-Auth: Role `admin` requires, uses JWT
-
-Returns a list of failed mails
-
-```bash
-GET /failed-mails
-Status: 200 OK
-```
-
-**Response:**
-
-Headers:
-```bash
-Content-Type application/json
-```
-
- Body:
-```json
-{
-    "success": true,
-    "data": null,
-    "error": null
-}
-```
-
-#### Create a new failed message:
-
-Auth: *will be*
-
-Create a new failed mail row
-```bash
-POST /failed-mails
-Status: 201 Created
-```
-
-**Response:**
-
-Headers:
-```bash
-Content-Type application/json
-```
-
- Body:
-```json
-{
-    "success": true,
-    "data": {
-      "id": 1,
-      "action": "register",
-      "payload": {
-        "to": "test@test.com"
-      },
-      "reason": "could not sent mail to non-existent mailbox"
-    },
-    "error": null
-}
-```

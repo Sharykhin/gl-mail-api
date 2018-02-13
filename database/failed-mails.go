@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/Sharykhin/gl-mail-api/entity"
 	_ "github.com/go-sql-driver/mysql" // dependency of mysql
@@ -23,14 +24,14 @@ func init() {
 	}
 }
 
-// Create creates a new row in database
-func Create(ctx context.Context, m entity.MessageRequest) (*entity.Message, error) {
-	p, err := json.Marshal(m.Payload)
+// Create creates a new record of failed mail
+func Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, error) {
+	p, err := json.Marshal(mr.Payload)
 	if err != nil {
-		return nil, fmt.Errorf("could not marshar payload: %s, err: %v", m, err)
+		return nil, fmt.Errorf("could not marshar payload: %s, err: %v", mr, err)
 	}
 
-	res, err := db.ExecContext(ctx, "INSERT INTO failed_messages(`action`,`payload`) VALUES(?, ?)", m.Action, p)
+	res, err := db.ExecContext(ctx, "INSERT INTO failed_mails(`action`, `payload`, `reason`, `created_at`) VALUES(?, ?, ?, NOW())", mr.Action, p, mr.Reason)
 	if err != nil {
 		return nil, fmt.Errorf("could not create a new failed message: %v", err)
 	}
@@ -41,8 +42,10 @@ func Create(ctx context.Context, m entity.MessageRequest) (*entity.Message, erro
 	}
 
 	return &entity.Message{
-		ID:      id,
-		Action:  m.Action,
-		Payload: m.Payload,
+		ID:        id,
+		Action:    mr.Action,
+		Payload:   mr.Payload,
+		Reason:    mr.Reason,
+		CreatedAt: time.Now(),
 	}, nil
 }
