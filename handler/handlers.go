@@ -13,6 +13,7 @@ import (
 
 func pong(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "text/plain")
 	_, err := w.Write([]byte("pong"))
 	if err != nil {
 		log.Fatalf("something really akward went wrong: %v", err)
