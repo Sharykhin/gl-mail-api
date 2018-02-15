@@ -12,16 +12,16 @@ type mockStorage struct {
 	mock.Mock
 }
 
-func (m mockStorage) Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, error) {
+func (m *mockStorage) Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, error) {
 	ret := m.Called(ctx, mr)
 
 	if rf, ok := ret.Get(0).(func(ctx context.Context, m entity.MessageRequest) (*entity.Message, error)); ok {
 		m, err := rf(ctx, mr)
 		return m, err
-	} else {
-		err := ret.Error(1)
-		return nil, err
 	}
+
+	err := ret.Error(1)
+	return nil, err
 }
 
 func TestCreate(t *testing.T) {

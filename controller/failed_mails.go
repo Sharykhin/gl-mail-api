@@ -7,7 +7,9 @@ import (
 	"github.com/Sharykhin/gl-mail-api/entity"
 )
 
-//TODO: experimental way to make code testable
+// TODO: experimental way to make code testable
+
+// Something Interface is something for something to implement
 type StorageKeeper interface {
 	Create(ctx context.Context, m entity.MessageRequest) (*entity.Message, error)
 }

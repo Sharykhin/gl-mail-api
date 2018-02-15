@@ -14,6 +14,8 @@ import (
 )
 
 var db *sql.DB
+
+// Storage keeps reference to a database source
 var Storage storage
 
 // TODO: experimental case how to implement it
