@@ -14,6 +14,16 @@ import (
 )
 
 var db *sql.DB
+var Storage storage
+
+// TODO: experimental case how to implement it
+type storage struct {
+	db *sql.DB
+}
+
+func (s storage) Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, error) {
+	return Create(ctx, mr)
+}
 
 func init() {
 	var err error
@@ -22,6 +32,8 @@ func init() {
 	if err != nil {
 		log.Fatalf("could not connect to mysql, source: %s, error: %v", dbSource, err)
 	}
+
+	Storage = storage{db: db}
 }
 
 // Create creates a new record of failed mail

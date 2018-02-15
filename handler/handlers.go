@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"log"
 	"net/http"
 
@@ -12,14 +11,6 @@ import (
 	"github.com/Sharykhin/gl-mail-api/entity"
 	"github.com/Sharykhin/gl-mail-api/util"
 )
-
-//TODO: I don't like how it looks
-type storage struct {
-}
-
-func (s storage) Create(ctx context.Context, m entity.MessageRequest) (*entity.Message, error) {
-	return db.Create(ctx, m)
-}
 
 func pong(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -46,14 +37,14 @@ func createFailedMail(w http.ResponseWriter, r *http.Request) {
 		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
 		return
 	}
-	// TODO: this one should be mocked
+	// TODO: this one should be mocked in case of unit tests
 	err = validate(mr)
 	if err != nil {
 		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
 		return
 	}
-	// TODO: this one should be mocked
-	m, err := controller.Create(r.Context(), mr, storage{})
+	// TODO: this one should be mocked in case of unit tests
+	m, err := controller.Create(r.Context(), mr, db.Storage)
 	if err != nil {
 		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusInternalServerError)
 		return

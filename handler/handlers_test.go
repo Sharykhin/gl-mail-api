@@ -7,6 +7,8 @@ import (
 	"github.com/gavv/httpexpect"
 )
 
+// Looks like it's more integrated tests than unit ones
+
 func TestPong(t *testing.T) {
 	t.Run("status ok", func(t *testing.T) {
 		e := httpexpect.WithConfig(httpexpect.Config{
