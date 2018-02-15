@@ -17,3 +17,8 @@ func Create(ctx context.Context, mr entity.MessageRequest, db StorageKeeper) (*e
 	// there might be some other stuff ...
 	return db.Create(ctx, mr)
 }
+
+// Old implementation
+//func Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, error) {
+//	return db.Create(ctx, mr)
+//}
