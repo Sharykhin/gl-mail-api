@@ -13,7 +13,7 @@ type StorageKeeper interface {
 }
 
 // Create creates a new failed mail entity
-func Create(ctx context.Context, m entity.MessageRequest, db StorageKeeper) (*entity.Message, error) {
+func Create(ctx context.Context, mr entity.MessageRequest, db StorageKeeper) (*entity.Message, error) {
 	// there might be some other stuff ...
-	return db.Create(ctx, m)
+	return db.Create(ctx, mr)
 }
