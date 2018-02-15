@@ -1,15 +1,25 @@
 package handler
 
 import (
+	"context"
 	"log"
 	"net/http"
 
 	"encoding/json"
 
 	"github.com/Sharykhin/gl-mail-api/controller"
+	db "github.com/Sharykhin/gl-mail-api/database"
 	"github.com/Sharykhin/gl-mail-api/entity"
 	"github.com/Sharykhin/gl-mail-api/util"
 )
+
+//TODO: I don't like how it looks
+type storage struct {
+}
+
+func (s storage) Create(ctx context.Context, m entity.MessageRequest) (*entity.Message, error) {
+	return db.Create(ctx, m)
+}
 
 func pong(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -43,7 +53,7 @@ func createFailedMail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// TODO: this one should be mocked
-	m, err := controller.Create(r.Context(), mr)
+	m, err := controller.Create(r.Context(), mr, storage{})
 	if err != nil {
 		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusInternalServerError)
 		return

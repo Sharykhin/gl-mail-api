@@ -83,7 +83,7 @@ func TestCreateFailedMail(t *testing.T) {
 		c.Value("data").Equal(nil)
 		c.Value("error").Equal("action is required")
 	})
-	// TODO: this is totally incorrect, validate method should be mocked
+
 	t.Run("bad request: payload is required", func(t *testing.T) {
 		e := httpexpect.WithConfig(httpexpect.Config{
 			Client: &http.Client{
