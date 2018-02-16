@@ -16,7 +16,11 @@ import (
 //JWTAuth middleware checks whether the jwt token was passed through Authorization header
 func JWTAuth(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
+		env := os.Getenv("APP_ENV")
+		if env == "test" {
+			h.ServeHTTP(w, r)
+			return
+		}
 		authHeader := r.Header.Get("Authorization")
 		isBearerAuth := strings.HasPrefix(authHeader, "Bearer ")
 

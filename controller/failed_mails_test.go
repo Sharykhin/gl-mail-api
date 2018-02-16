@@ -24,6 +24,14 @@ func (m *mockStorage) Create(ctx context.Context, mr entity.MessageRequest) (*en
 	return nil, err
 }
 
+func (m *mockStorage) GetList(ctx context.Context, limit, offset int) ([]entity.Message, error) {
+	return nil, nil
+}
+
+func (m *mockStorage) Count(ctx context.Context) (int, error) {
+	return 0, nil
+}
+
 func TestCreate(t *testing.T) {
 	ctx := context.Background()
 

@@ -27,6 +27,14 @@ func (s storage) Create(ctx context.Context, mr entity.MessageRequest) (*entity.
 	return Create(ctx, mr)
 }
 
+func (s storage) GetList(ctx context.Context, limit, offset int) ([]entity.Message, error) {
+	return GetList(ctx, limit, offset)
+}
+
+func (s storage) Count(ctx context.Context) (int, error) {
+	return Count(ctx)
+}
+
 func init() {
 	var err error
 	dbSource := os.Getenv("MYSQL_SOURCE")
@@ -62,4 +70,36 @@ func Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, err
 		Reason:    mr.Reason,
 		CreatedAt: time.Now(),
 	}, nil
+}
+
+// GetList returns limited number of rows
+func GetList(ctx context.Context, limit, offset int) ([]entity.Message, error) {
+	rows, err := db.QueryContext(ctx, "SELECT `id`, `action`, `reason` FROM failed_mails LIMIT ? OFFSET ?", limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("could not make a select statement: %v", err)
+	}
+	defer rows.Close() // nolint: errcheck
+
+	var messages []entity.Message
+	for rows.Next() {
+		var m entity.Message
+		err := rows.Scan(&m.ID, &m.Action, &m.Reason)
+		if err != nil {
+			return nil, fmt.Errorf("could not scan a row to struct %v: %v", m, err)
+		}
+		messages = append(messages, m)
+	}
+
+	return messages, rows.Err()
+}
+
+// Count returns number of all rows
+func Count(ctx context.Context) (int, error) {
+	var count int
+	row := db.QueryRowContext(ctx, "SELECT COUND(id) AS `total` FROM failed_mails")
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("could not make select statement: %v", err)
+	}
+	return count, nil
 }

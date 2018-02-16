@@ -6,6 +6,8 @@ import (
 
 	"encoding/json"
 
+	"strconv"
+
 	"github.com/Sharykhin/gl-mail-api/controller"
 	db "github.com/Sharykhin/gl-mail-api/database"
 	"github.com/Sharykhin/gl-mail-api/entity"
@@ -22,7 +24,29 @@ func pong(w http.ResponseWriter, r *http.Request) {
 }
 
 func getFailedMailsList(w http.ResponseWriter, r *http.Request) {
-	util.SendResponse(util.Response{Success: true, Data: nil, Error: nil}, w, http.StatusOK)
+	limit, err := queryParamInt(r, "limit", 10)
+	if err != nil {
+		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
+		return
+	}
+
+	offset, err := queryParamInt(r, "offset", 0)
+	if err != nil {
+		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
+		return
+	}
+
+	m, c, err := controller.GetList(r.Context(), db.Storage, limit, offset)
+
+	if err != nil {
+		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusInternalServerError)
+		return
+	}
+
+	util.SendResponse(util.Response{Success: true, Data: map[string]interface{}{
+		"mails": m,
+		"count": c,
+	}, Error: nil}, w, http.StatusOK)
 }
 
 func createFailedMail(w http.ResponseWriter, r *http.Request) {
@@ -55,4 +79,14 @@ func createFailedMail(w http.ResponseWriter, r *http.Request) {
 
 func validate(v entity.InputValidation) error {
 	return v.Validate()
+}
+
+func queryParamInt(r *http.Request, key string, defaultValue int) (int, error) {
+	v := r.FormValue(key)
+
+	if v == "" {
+		return defaultValue, nil
+	}
+
+	return strconv.Atoi(v)
 }

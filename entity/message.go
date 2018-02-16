@@ -42,4 +42,5 @@ type Message struct {
 	Payload   map[string]interface{} `json:"payload"`
 	Reason    string                 `json:"reason"`
 	CreatedAt time.Time              `json:"created_at"`
+	DeletedAt time.Time              `json:"deleted_at"`
 }
