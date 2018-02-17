@@ -57,7 +57,7 @@ func createFailedMail(w http.ResponseWriter, r *http.Request) {
 
 	err := decoder.Decode(&fmr)
 	if err != nil {
-		log.Printf("could not decode income request to struct: %s, error: %v", mr, err)
+		log.Printf("could not decode income request to struct: %v, error: %v", fmr, err)
 		util.SendResponse(util.Response{Success: false, Data: nil, Error: err}, w, http.StatusBadRequest)
 		return
 	}

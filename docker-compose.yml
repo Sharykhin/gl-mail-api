@@ -10,9 +10,9 @@ services:
     env_file:
       - ./.docker/golang/.env
     links:
-      - mysql
+      - gl-mail-api-mysql
     depends_on:
-      - mysql
+      - gl-mail-api-mysql
     ports:
       - "8002:8002"
 

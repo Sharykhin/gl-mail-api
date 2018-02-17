@@ -23,8 +23,8 @@ type storage struct {
 	db *sql.DB
 }
 
-func (s storage) Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, error) {
-	return Create(ctx, mr)
+func (s storage) Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.Message, error) {
+	return Create(ctx, fmr)
 }
 
 func (s storage) GetList(ctx context.Context, limit, offset int) ([]entity.Message, error) {
@@ -53,7 +53,7 @@ func Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.Message, e
 		return nil, fmt.Errorf("could not marshar payload: %s, err: %v", fmr, err)
 	}
 
-	res, err := db.ExecContext(ctx, "INSERT INTO failed_mails(`action`, `payload`, `reason`, `created_at`) VALUES(?, ?, ?, NOW())", mr.Action, p, mr.Reason)
+	res, err := db.ExecContext(ctx, "INSERT INTO failed_mails(`action`, `payload`, `reason`, `created_at`) VALUES(?, ?, ?, NOW())", fmr.Action, p, fmr.Reason)
 	if err != nil {
 		return nil, fmt.Errorf("could not create a new failed message: %v", err)
 	}
