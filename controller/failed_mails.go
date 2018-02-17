@@ -13,15 +13,15 @@ import (
 
 // Something Interface is something for something to implement
 type StorageKeeper interface {
-	Create(ctx context.Context, m entity.MessageRequest) (*entity.Message, error)
+	Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.Message, error)
 	GetList(ctx context.Context, limit, offset int) ([]entity.Message, error)
 	Count(ctx context.Context) (int, error)
 }
 
 // Create creates a new failed mail entity
-func Create(ctx context.Context, mr entity.MessageRequest, db StorageKeeper) (*entity.Message, error) {
+func Create(ctx context.Context, fmr entity.FailMailRequest, db StorageKeeper) (*entity.Message, error) {
 	// there might be some other stuff ...
-	return db.Create(ctx, mr)
+	return db.Create(ctx, fmr)
 }
 
 // GetList returns limiter number of rows with count value
@@ -74,7 +74,9 @@ func GetList(ctx context.Context, db StorageKeeper, limit, offset int) ([]entity
 func getList(ctx context.Context, db StorageKeeper, limit, offset int, chMessages chan<- []entity.Message, chErr chan<- error) {
 	messages, err := db.GetList(ctx, limit, offset)
 	if err != nil {
-		chErr <- fmt.Errorf("could not get list of messages: %v", err)
+		if ctx.Err() != context.Canceled {
+			chErr <- fmt.Errorf("could not get list of messages: %v", err)
+		}
 	}
 	chMessages <- messages
 	close(chMessages)
@@ -83,7 +85,9 @@ func getList(ctx context.Context, db StorageKeeper, limit, offset int, chMessage
 func countMessages(ctx context.Context, db StorageKeeper, chCount chan<- int, chErr chan<- error) {
 	c, err := db.Count(ctx)
 	if err != nil {
-		chErr <- fmt.Errorf("could not count number of rows: %v", err)
+		if ctx.Err() != context.Canceled {
+			chErr <- fmt.Errorf("could not count number of rows: %v", err)
+		}
 	}
 	chCount <- c
 	close(chCount)

@@ -47,10 +47,10 @@ func init() {
 }
 
 // Create creates a new record of failed mail
-func Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, error) {
-	p, err := json.Marshal(mr.Payload)
+func Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.Message, error) {
+	p, err := json.Marshal(fmr.Payload)
 	if err != nil {
-		return nil, fmt.Errorf("could not marshar payload: %s, err: %v", mr, err)
+		return nil, fmt.Errorf("could not marshar payload: %s, err: %v", fmr, err)
 	}
 
 	res, err := db.ExecContext(ctx, "INSERT INTO failed_mails(`action`, `payload`, `reason`, `created_at`) VALUES(?, ?, ?, NOW())", mr.Action, p, mr.Reason)
@@ -65,9 +65,9 @@ func Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, err
 
 	return &entity.Message{
 		ID:        id,
-		Action:    mr.Action,
-		Payload:   mr.Payload,
-		Reason:    mr.Reason,
+		Action:    fmr.Action,
+		Payload:   fmr.Payload,
+		Reason:    fmr.Reason,
 		CreatedAt: time.Now(),
 	}, nil
 }

@@ -11,15 +11,15 @@ type InputValidation interface {
 	Validate() error
 }
 
-// MessageRequest represent income request body
-type MessageRequest struct {
+// FailMailRequest represents income request body
+type FailMailRequest struct {
 	Action  string                 `json:"action"`
 	Payload map[string]interface{} `json:"payload"`
 	Reason  string                 `json:"reason"`
 }
 
 // Validate - implementation of the InputValidation interface
-func (mr MessageRequest) Validate() error {
+func (mr FailMailRequest) Validate() error {
 	if strings.Trim(mr.Action, " ") == "" {
 		return fmt.Errorf("action is required")
 	}
