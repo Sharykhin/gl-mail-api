@@ -16,14 +16,12 @@ type mockStorage struct {
 
 func (m *mockStorage) Create(ctx context.Context, mr entity.FailMailRequest) (*entity.FailMail, error) {
 	ret := m.Called(ctx, mr)
-
-	if rf, ok := ret.Get(0).(func(ctx context.Context, m entity.FailMailRequest) (*entity.FailMail, error)); ok {
-		m, err := rf(ctx, mr)
-		return m, err
+	fm, err := ret.Get(0).(*entity.FailMail), ret.Get(1)
+	if err != nil {
+		return nil, err.(error)
 	}
 
-	err := ret.Error(1)
-	return nil, err
+	return fm, nil
 }
 
 func (m *mockStorage) GetList(ctx context.Context, limit, offset int) ([]entity.FailMail, error) {
@@ -37,7 +35,7 @@ func (m *mockStorage) Count(ctx context.Context) (int, error) {
 func TestCreate(t *testing.T) {
 	ctx := context.Background()
 
-	mr := entity.FailMailRequest{
+	fmr := entity.FailMailRequest{
 		Action: "register",
 		Payload: entity.Payload{
 			"to": json.RawMessage("test@mail.com"),
@@ -55,8 +53,8 @@ func TestCreate(t *testing.T) {
 	}
 
 	mockS := new(mockStorage)
-	mockS.On("Create", ctx, mr).Return(m, nil).Once()
-	_, err := Create(ctx, mr, mockS)
+	mockS.On("Create", ctx, fmr).Return(m, nil).Once()
+	_, err := Create(ctx, fmr, mockS)
 	if err != nil {
 		t.Errorf("expected success creation, but got an error: %v", err)
 	}
