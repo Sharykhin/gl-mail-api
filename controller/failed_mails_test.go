@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"encoding/json"
+
 	"github.com/Sharykhin/gl-mail-api/entity"
 	"github.com/stretchr/testify/mock"
 )
@@ -12,10 +14,10 @@ type mockStorage struct {
 	mock.Mock
 }
 
-func (m *mockStorage) Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, error) {
+func (m *mockStorage) Create(ctx context.Context, mr entity.FailMailRequest) (*entity.FailMail, error) {
 	ret := m.Called(ctx, mr)
 
-	if rf, ok := ret.Get(0).(func(ctx context.Context, m entity.MessageRequest) (*entity.Message, error)); ok {
+	if rf, ok := ret.Get(0).(func(ctx context.Context, m entity.FailMailRequest) (*entity.FailMail, error)); ok {
 		m, err := rf(ctx, mr)
 		return m, err
 	}
@@ -24,7 +26,7 @@ func (m *mockStorage) Create(ctx context.Context, mr entity.MessageRequest) (*en
 	return nil, err
 }
 
-func (m *mockStorage) GetList(ctx context.Context, limit, offset int) ([]entity.Message, error) {
+func (m *mockStorage) GetList(ctx context.Context, limit, offset int) ([]entity.FailMail, error) {
 	return nil, nil
 }
 
@@ -35,19 +37,19 @@ func (m *mockStorage) Count(ctx context.Context) (int, error) {
 func TestCreate(t *testing.T) {
 	ctx := context.Background()
 
-	mr := entity.MessageRequest{
+	mr := entity.FailMailRequest{
 		Action: "register",
-		Payload: map[string]interface{}{
-			"to": "test@mail.com",
+		Payload: entity.Payload{
+			"to": json.RawMessage("test@mail.com"),
 		},
 		Reason: "test reason",
 	}
 
-	m := &entity.Message{
+	m := &entity.FailMail{
 		ID:     12,
 		Action: "register",
-		Payload: map[string]interface{}{
-			"to": "test@mail.com",
+		Payload: entity.Payload{
+			"to": json.RawMessage("test@mail.com"),
 		},
 		Reason: "test reason",
 	}

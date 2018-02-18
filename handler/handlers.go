@@ -8,6 +8,7 @@ import (
 
 	"strconv"
 
+	"github.com/Sharykhin/gl-mail-api/contract"
 	"github.com/Sharykhin/gl-mail-api/controller"
 	db "github.com/Sharykhin/gl-mail-api/database"
 	"github.com/Sharykhin/gl-mail-api/entity"
@@ -45,7 +46,8 @@ func getFailedMailsList(w http.ResponseWriter, r *http.Request) {
 
 	util.SendResponse(util.Response{Success: true, Data: map[string]interface{}{
 		"mails": m,
-		"count": c,
+		"total": c,
+		"count": len(m),
 	}, Error: nil}, w, http.StatusOK)
 }
 
@@ -77,7 +79,7 @@ func createFailedMail(w http.ResponseWriter, r *http.Request) {
 	util.SendResponse(util.Response{Success: true, Data: m, Error: nil}, w, http.StatusCreated)
 }
 
-func validate(v entity.InputValidation) error {
+func validate(v contract.InputValidation) error {
 	return v.Validate()
 }
 

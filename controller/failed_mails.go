@@ -13,29 +13,27 @@ import (
 
 // Something Interface is something for something to implement
 type StorageKeeper interface {
-	Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.Message, error)
-	GetList(ctx context.Context, limit, offset int) ([]entity.Message, error)
+	Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.FailMail, error)
+	GetList(ctx context.Context, limit, offset int) ([]entity.FailMail, error)
 	Count(ctx context.Context) (int, error)
 }
 
 // Create creates a new failed mail entity
-func Create(ctx context.Context, fmr entity.FailMailRequest, db StorageKeeper) (*entity.Message, error) {
+func Create(ctx context.Context, fmr entity.FailMailRequest, db StorageKeeper) (*entity.FailMail, error) {
 	// there might be some other stuff ...
 	return db.Create(ctx, fmr)
 }
 
 // GetList returns limiter number of rows with count value
-func GetList(ctx context.Context, db StorageKeeper, limit, offset int) ([]entity.Message, int, error) {
+func GetList(ctx context.Context, db StorageKeeper, limit, offset int) ([]entity.FailMail, int, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	chMessages := make(chan []entity.Message)
-	//defer close(chMessages)
+	chMessages := make(chan []entity.FailMail)
 	chCount := make(chan int)
-	//defer close(chCount)
 	chErr := make(chan error)
 	defer close(chErr)
 
-	var messages []entity.Message
+	var messages []entity.FailMail
 	var count int
 
 	go getList(ctx, db, limit, offset, chMessages, chErr)
@@ -48,21 +46,18 @@ func GetList(ctx context.Context, db StorageKeeper, limit, offset int) ([]entity
 
 		select {
 		case mm, ok := <-chMessages:
-			fmt.Println("get messages", mm, ok)
 			if !ok {
 				chMessages = nil
 				continue
 			}
 			messages = mm
 		case c, ok := <-chCount:
-			fmt.Println("get count", c, ok)
 			if !ok {
 				chCount = nil
 				continue
 			}
 			count = c
-		case err, ok := <-chErr:
-			fmt.Println("HA HAH A", ok)
+		case err := <-chErr:
 			cancel()
 			return nil, 0, err
 		}
@@ -71,7 +66,7 @@ func GetList(ctx context.Context, db StorageKeeper, limit, offset int) ([]entity
 
 }
 
-func getList(ctx context.Context, db StorageKeeper, limit, offset int, chMessages chan<- []entity.Message, chErr chan<- error) {
+func getList(ctx context.Context, db StorageKeeper, limit, offset int, chMessages chan<- []entity.FailMail, chErr chan<- error) {
 	messages, err := db.GetList(ctx, limit, offset)
 	if err != nil {
 		if ctx.Err() != context.Canceled {
@@ -94,6 +89,6 @@ func countMessages(ctx context.Context, db StorageKeeper, chCount chan<- int, ch
 }
 
 // Old implementation
-//func Create(ctx context.Context, mr entity.MessageRequest) (*entity.Message, error) {
+//func Create(ctx context.Context, mr entity.MessageRequest) (*entity.FailMail, error) {
 //	return db.Create(ctx, mr)
 //}

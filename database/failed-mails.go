@@ -23,11 +23,11 @@ type storage struct {
 	db *sql.DB
 }
 
-func (s storage) Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.Message, error) {
+func (s storage) Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.FailMail, error) {
 	return Create(ctx, fmr)
 }
 
-func (s storage) GetList(ctx context.Context, limit, offset int) ([]entity.Message, error) {
+func (s storage) GetList(ctx context.Context, limit, offset int) ([]entity.FailMail, error) {
 	return GetList(ctx, limit, offset)
 }
 
@@ -47,7 +47,7 @@ func init() {
 }
 
 // Create creates a new record of failed mail
-func Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.Message, error) {
+func Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.FailMail, error) {
 	p, err := json.Marshal(fmr.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("could not marshar payload: %s, err: %v", fmr, err)
@@ -63,27 +63,28 @@ func Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.Message, e
 		return nil, fmt.Errorf("could not get last insert id: %v", err)
 	}
 
-	return &entity.Message{
+	return &entity.FailMail{
 		ID:        id,
 		Action:    fmr.Action,
 		Payload:   fmr.Payload,
 		Reason:    fmr.Reason,
-		CreatedAt: time.Now(),
+		CreatedAt: entity.JSONTime(time.Now()),
+		DeletedAt: nil,
 	}, nil
 }
 
 // GetList returns limited number of rows
-func GetList(ctx context.Context, limit, offset int) ([]entity.Message, error) {
-	rows, err := db.QueryContext(ctx, "SELECT `id`, `action`, `reason` FROM failed_mails LIMIT ? OFFSET ?", limit, offset)
+func GetList(ctx context.Context, limit, offset int) ([]entity.FailMail, error) {
+	rows, err := db.QueryContext(ctx, "SELECT `id`, `action`, `reason`, `payload`, `created_at`, `deleted_at` FROM failed_mails LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("could not make a select statement: %v", err)
 	}
 	defer rows.Close() // nolint: errcheck
 
-	var messages []entity.Message
+	var messages []entity.FailMail
 	for rows.Next() {
-		var m entity.Message
-		err := rows.Scan(&m.ID, &m.Action, &m.Reason)
+		var m entity.FailMail
+		err := rows.Scan(&m.ID, &m.Action, &m.Reason, &m.Payload, &m.CreatedAt, &m.DeletedAt)
 		if err != nil {
 			return nil, fmt.Errorf("could not scan a row to struct %v: %v", m, err)
 		}
@@ -96,7 +97,7 @@ func GetList(ctx context.Context, limit, offset int) ([]entity.Message, error) {
 // Count returns number of all rows
 func Count(ctx context.Context) (int, error) {
 	var count int
-	row := db.QueryRowContext(ctx, "SELECT COUND(id) AS `total` FROM failed_mails")
+	row := db.QueryRowContext(ctx, "SELECT COUNT(id) AS `total` FROM failed_mails")
 	err := row.Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("could not make select statement: %v", err)
