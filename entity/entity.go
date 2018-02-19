@@ -32,9 +32,10 @@ func (fmr FailMailRequest) Validate() error {
 
 	var stuff struct{}
 	m, err := fmr.Payload.MarshalJSON()
-	if err != nil {
+	if err != nil || string(m) == "null" {
 		return fmt.Errorf("payload must be a valid json")
 	}
+
 	err = json.Unmarshal(m, &stuff)
 	if err != nil {
 		return fmt.Errorf("payload must be a valid json")

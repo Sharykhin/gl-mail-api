@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"testing"
 
+	"encoding/json"
+
 	"github.com/gavv/httpexpect"
 )
 
@@ -86,7 +88,7 @@ func TestCreateFailedMail(t *testing.T) {
 		c.Value("error").Equal("action is required")
 	})
 
-	t.Run("bad request: payload is required", func(t *testing.T) {
+	t.Run("bad request: payload is valid", func(t *testing.T) {
 		e := httpexpect.WithConfig(httpexpect.Config{
 			Client: &http.Client{
 				Transport: httpexpect.NewBinder(Handler()),
@@ -98,6 +100,7 @@ func TestCreateFailedMail(t *testing.T) {
 		payload := map[string]interface{}{
 			"action":  "register",
 			"payload": nil,
+			"reason":  "test reason",
 		}
 
 		c := e.Request(http.MethodPost, "/failed-mails").
@@ -105,7 +108,7 @@ func TestCreateFailedMail(t *testing.T) {
 			Expect().Status(http.StatusBadRequest).JSON().Object()
 		c.Value("success").Equal(false)
 		c.Value("data").Equal(nil)
-		c.Value("error").Equal("payload is required")
+		c.Value("error").Equal("payload must be a valid json")
 	})
 
 	t.Run("bad request: reason is required", func(t *testing.T) {
@@ -119,7 +122,7 @@ func TestCreateFailedMail(t *testing.T) {
 
 		payload := map[string]interface{}{
 			"action":  "register",
-			"payload": map[string]interface{}{},
+			"payload": json.RawMessage([]byte(`{}`)),
 			"reason":  nil,
 		}
 
