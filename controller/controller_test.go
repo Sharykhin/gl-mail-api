@@ -69,7 +69,22 @@ func (m errorMockList) GetList(ctx context.Context, limit, offset int) ([]entity
 }
 
 func (m errorMockList) Count(ctx context.Context) (int, error) {
-	return 0, nil
+	ret := m.Called(ctx)
+	return ret.Get(0).(int), nil
+}
+
+type errorCountMockList struct {
+	mockStorage
+}
+
+func (m errorCountMockList) GetList(ctx context.Context, limit, offset int) ([]entity.FailMail, error) {
+	ret := m.Called(ctx, limit, offset)
+	return ret.Get(0).([]entity.FailMail), nil
+}
+
+func (m errorCountMockList) Count(ctx context.Context) (int, error) {
+	m.Called(ctx)
+	return 0, errors.New("something went wrong")
 }
 
 func (m *errorMockStorage) Create(ctx context.Context, mr entity.FailMailRequest) (*entity.FailMail, error) {
@@ -163,7 +178,26 @@ func TestGetList(t *testing.T) {
 		assert.Equal(t, 2, len(fm), "number of mails should be equal 2")
 	})
 
-	t.Run("bad getting", func(t *testing.T) {
+	t.Run("error on list", func(t *testing.T) {
+		ctx := context.Background()
+		cc, _ := context.WithCancel(ctx)
+
+		var exErr error = errors.New("could not get list of messages: something went wrong")
+		mockS := new(errorMockList)
+		mockS.On("GetList", cc, 10, 0).Return(nil, exErr).Once()
+		mockS.On("Count", cc).Return(10, nil).Once()
+
+		fm, c, err := GetList(ctx, mockS, 10, 0)
+		if err == nil {
+			t.Errorf("expected error but got retusl: %v", fm)
+		}
+
+		assert.Nil(t, fm, "result  should be nil")
+		assert.Equal(t, exErr.Error(), err.Error())
+		assert.Equal(t, 0, c, "count should equal 0")
+	})
+
+	t.Run("error on count", func(t *testing.T) {
 		ctx := context.Background()
 		cc, _ := context.WithCancel(ctx)
 
@@ -181,17 +215,18 @@ func TestGetList(t *testing.T) {
 				Reason:  "test reason",
 			},
 		}
-
-		mockS := new(errorMockList)
+		var exErr error = errors.New("could not count number of rows: something went wrong")
+		mockS := new(errorCountMockList)
 		mockS.On("GetList", cc, 10, 0).Return(fm, nil).Once()
-		mockS.On("Count", cc).Return(10, nil).Once()
+		mockS.On("Count", cc).Return(0, exErr).Once()
 
 		fm, c, err := GetList(ctx, mockS, 10, 0)
 		if err == nil {
 			t.Errorf("expected error but got retusl: %v", fm)
 		}
 
-		assert.Nil(t, fm, "result  should be nil")
+		assert.Equal(t, exErr.Error(), err.Error())
+		assert.Nil(t, fm, "result should be nil")
 		assert.Equal(t, 0, c, "count should return zero")
 	})
 }
