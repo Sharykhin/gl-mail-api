@@ -66,7 +66,7 @@ func Create(ctx context.Context, fmr entity.FailMailRequest) (*entity.FailMail, 
 	return &entity.FailMail{
 		ID:        id,
 		Action:    fmr.Action,
-		Payload:   fmr.Payload,
+		Payload:   entity.Payload(fmr.Payload),
 		Reason:    fmr.Reason,
 		CreatedAt: entity.JSONTime(time.Now()),
 		DeletedAt: nil,

@@ -19,9 +19,9 @@ type FailMail struct {
 
 // FailMailRequest represents income request body
 type FailMailRequest struct {
-	Action  string  `json:"action"`
-	Payload Payload `json:"payload"`
-	Reason  string  `json:"reason"`
+	Action  string          `json:"action"`
+	Payload json.RawMessage `json:"payload"`
+	Reason  string          `json:"reason"`
 }
 
 // Validate - implementation of the InputValidation interface
@@ -29,7 +29,16 @@ func (fmr FailMailRequest) Validate() error {
 	if strings.Trim(fmr.Action, " ") == "" {
 		return fmt.Errorf("action is required")
 	}
-	fmt.Println("HAHA", fmr.Payload)
+
+	var stuff struct{}
+	m, err := fmr.Payload.MarshalJSON()
+	if err != nil {
+		return fmt.Errorf("payload must be a valid json")
+	}
+	err = json.Unmarshal(m, &stuff)
+	if err != nil {
+		return fmt.Errorf("payload must be a valid json")
+	}
 	if fmr.Payload == nil {
 		return fmt.Errorf("payload is required")
 	}
@@ -50,29 +59,17 @@ func (t JSONTime) MarshalJSON() ([]byte, error) {
 }
 
 // Payload is a specific time for json struct of a payload
-type Payload map[string]json.RawMessage
+type Payload json.RawMessage
 
 //@QUESTION: is it a good way to convert data from storage to a specific struct value
 
 // Scan implements a common interface for scanning values from database source to a specific struct
-func (p *Payload) Scan(v interface{}) error {
-	err := json.Unmarshal(v.([]byte), &p)
-	return err
-}
+//func (p Payload) Scan(v interface{}) error {
+//	fmt.Println("a", p)
+//	err := json.Unmarshal(v.([]byte), &p)
+//	return err
+//}
 
-// Test implementation
-func (p Payload) UnmarshalJSON(b []byte) error {
-	var stuff map[string]json.RawMessage
-
-	err := json.Unmarshal(b, &stuff)
-	if err != nil {
-		return fmt.Errorf("payload must be a valid json")
-	}
-	if p == nil {
-		p = map[string]json.RawMessage{}
-	}
-	for key, value := range stuff {
-		p[key] = value
-	}
-	return nil
+func (p Payload) MarshalJSON() ([]byte, error) {
+	return []byte(string(p)), nil
 }
