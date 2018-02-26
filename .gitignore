@@ -6,3 +6,4 @@ jwtRS256.key.pub
 !.docker-runtime/.gitkeep
 .docker/golang/.env
 .docker/mysql/.env
+server.crt

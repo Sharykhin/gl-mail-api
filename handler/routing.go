@@ -12,6 +12,5 @@ func Handler() http.Handler {
 	r := mux.NewRouter()
 	r.Handle("/ping", http.HandlerFunc(pong)).Methods("GET")
 	r.Handle("/failed-mails", middleware.Chain(http.HandlerFunc(getFailedMailsList), middleware.JWTAuth)).Methods("GET")
-	r.Handle("/failed-mails", http.HandlerFunc(createFailedMail)).Methods("POST")
 	return r
 }
