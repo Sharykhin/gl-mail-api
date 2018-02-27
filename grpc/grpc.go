@@ -10,17 +10,15 @@ import (
 
 	"time"
 
+	"os"
+
 	"github.com/Sharykhin/gl-mail-api/entity"
 	"github.com/Sharykhin/gl-mail-grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
-const (
-	cert    = "server.crt"
-	address = "localhost:50051"
-)
-
+// Server is a reference to a private struct that represent
 var Server server
 
 type server struct {
@@ -59,10 +57,13 @@ func (s server) GetList(ctx context.Context, limit, offset int64) ([]entity.Fail
 }
 
 func init() {
+	cert := os.Getenv("GRPC_PUBLIC_KEY")
 	cred, err := credentials.NewClientTLSFromFile(cert, "")
 	if err != nil {
 		log.Fatalf("Could not load tls cert: %s", err)
 	}
+
+	address := os.Getenv("GRPC_SERVER_ADDRESS")
 
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(cred))
 	if err != nil {

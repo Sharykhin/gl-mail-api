@@ -11,6 +11,7 @@ type Response struct {
 	Success bool        `json:"success"`
 	Data    interface{} `json:"data"`
 	Error   error       `json:"error"`
+	Meta    interface{} `json:"meta"`
 }
 
 // SendResponse send json response to a client
@@ -33,9 +34,11 @@ func (res Response) MarshalJSON() ([]byte, error) {
 		Success bool        `json:"success"`
 		Data    interface{} `json:"data"`
 		Error   interface{} `json:"error"`
+		Meta    interface{} `json:"meta"`
 	}{
 		Success: res.Success,
 		Data:    res.Data,
 		Error:   err,
+		Meta:    res.Meta,
 	})
 }

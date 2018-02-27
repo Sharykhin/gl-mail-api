@@ -5,9 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
-
 	"os"
+	"strings"
 
 	"github.com/Sharykhin/gl-mail-api/util"
 	"github.com/dgrijalva/jwt-go"
@@ -26,7 +25,7 @@ func JWTAuth(h http.Handler) http.Handler {
 
 		if isBearerAuth {
 			tokenString := authHeader[len("Bearer "):]
-			keyFile := os.Getenv("PUBLIC_KEY")
+			keyFile := os.Getenv("JWT_PUBLIC_KEY")
 
 			publicKey, err := ioutil.ReadFile(keyFile)
 			if err != nil {
