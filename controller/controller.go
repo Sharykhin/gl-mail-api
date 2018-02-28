@@ -15,7 +15,6 @@ type failMail struct {
 	storage contract.StorageProvider
 }
 
-// GetList returns limiter number of rows with a total count
 func (c failMail) GetList(ctx context.Context, limit, offset int64) ([]entity.FailMail, int, error) {
 	fm, err := grpc.Server.GetList(ctx, limit, offset)
 	if err != nil {

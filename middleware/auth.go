@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"crypto/rsa"
+
 	"github.com/Sharykhin/gl-mail-api/util"
 	"github.com/dgrijalva/jwt-go"
 )
@@ -27,13 +29,10 @@ func JWTAuth(h http.Handler) http.Handler {
 			tokenString := authHeader[len("Bearer "):]
 			keyFile := os.Getenv("JWT_PUBLIC_KEY")
 
-			publicKey, err := ioutil.ReadFile(keyFile)
+			// If something went wrong with public key, put down the server
+			publicRSA, err := parseRSAPublicKey(keyFile)
 			if err != nil {
-				log.Fatalf("Could not read public.pem file: %v", err)
-			}
-			publicRSA, err := jwt.ParseRSAPublicKeyFromPEM(publicKey)
-			if err != nil {
-				log.Fatalf("could not parse public key: %s. %v", publicKey, err)
+				log.Fatalf("could not parse public key: %v", err)
 			}
 
 			token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
@@ -89,4 +88,18 @@ func JWTAuth(h http.Handler) http.Handler {
 			Error:   fmt.Errorf(http.StatusText(http.StatusUnauthorized)),
 		}, w, http.StatusUnauthorized)
 	})
+}
+
+func parseRSAPublicKey(keyFile string) (*rsa.PublicKey, error) {
+
+	publicKey, err := ioutil.ReadFile(keyFile)
+	if err != nil {
+		return nil, fmt.Errorf("could not read public key file: %v", err)
+	}
+	publicRSA, err := jwt.ParseRSAPublicKeyFromPEM(publicKey)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse public key: %s. %v", publicKey, err)
+	}
+
+	return publicRSA, nil
 }

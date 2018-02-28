@@ -1,16 +1,12 @@
 package grpc
 
 import (
-	"log"
-
 	"context"
-	"io"
-
 	"fmt"
-
-	"time"
-
+	"io"
+	"log"
 	"os"
+	"time"
 
 	"github.com/Sharykhin/gl-mail-api/entity"
 	"github.com/Sharykhin/gl-mail-grpc"
@@ -69,6 +65,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("Could not connet to a grpc server: %v", err)
 	}
+	// TODO: is it ok that we don't close the grpc connection?
 	//defer conn.Close()
 	client := api.NewFailMailClient(conn)
 	Server = server{client: client}

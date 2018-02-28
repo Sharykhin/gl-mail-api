@@ -24,6 +24,8 @@ func SendResponse(r Response, w http.ResponseWriter, status int) {
 	}
 }
 
+// TODO: just because we want to get error as type we need to duplicate quite a big part of code. Is it ok?
+
 // MarshalJSON implement MarshalJSON interface method to convert error type to string
 func (res Response) MarshalJSON() ([]byte, error) {
 	var err interface{}

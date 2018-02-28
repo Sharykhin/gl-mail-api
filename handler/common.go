@@ -11,6 +11,5 @@ func queryParamInt(r *http.Request, key string, defaultValue int64) (int64, erro
 	if v == "" {
 		return defaultValue, nil
 	}
-	n, err := strconv.Atoi(v)
-	return int64(n), err
+	return strconv.ParseInt(v, 10, 64)
 }
