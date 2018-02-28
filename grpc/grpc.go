@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"time"
 
 	"github.com/Sharykhin/gl-mail-api/entity"
 	"github.com/Sharykhin/gl-mail-grpc"
@@ -28,7 +27,7 @@ func (s server) GetList(ctx context.Context, limit, offset int64) ([]entity.Fail
 	if err != nil {
 		return nil, fmt.Errorf("could not stream fail mails: %v", err)
 	}
-	var fm []entity.FailMail
+	var fms []entity.FailMail
 	for {
 		m, err := stream.Recv()
 		if err == io.EOF {
@@ -37,19 +36,22 @@ func (s server) GetList(ctx context.Context, limit, offset int64) ([]entity.Fail
 		if err != nil {
 			return nil, fmt.Errorf("%v.GetFailMails(_) = _, %v", s.client, err)
 		}
-		t, err := time.Parse("2006-01-02 15:04:05", m.CreatedAt)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fm = append(fm, entity.FailMail{
+
+		fm := entity.FailMail{
 			ID:        m.ID,
 			Action:    m.Action,
-			Payload:   entity.Payload(m.Payload),
+			Payload:   m.Payload,
 			Reason:    m.Reason,
-			CreatedAt: entity.JSONTime(t),
-		})
+			CreatedAt: m.CreatedAt,
+		}
+
+		if m.DeletedAt != "" {
+			fm.DeletedAt = &m.DeletedAt
+		}
+
+		fms = append(fms, fm)
 	}
-	return fm, nil
+	return fms, nil
 }
 
 func init() {

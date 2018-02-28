@@ -52,6 +52,11 @@ For local env:
 JWT_PUBLIC_KEY=jwtRS256.key.pub GRPC_PUBLIC_KEY=server.crt GRPC_SERVER_ADDRESS=localhost:50051 go run main.go
 ```
 
+or use Makefile:
+```bash
+make dev
+```
+
 *Examples:*  
 
 Health-check
