@@ -54,6 +54,15 @@ func (s server) GetList(ctx context.Context, limit, offset int64) ([]entity.Fail
 	return fms, nil
 }
 
+func (s server) Count(ctx context.Context) (int64, error) {
+	res, err := s.client.CountFailMails(ctx, &api.Empty{})
+	if err != nil {
+		return 0, fmt.Errorf("could get count on from grpc: %v", err)
+	}
+
+	return res.Total, nil
+}
+
 func init() {
 	cert := os.Getenv("GRPC_PUBLIC_KEY")
 	cred, err := credentials.NewClientTLSFromFile(cert, "")

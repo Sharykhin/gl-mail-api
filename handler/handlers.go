@@ -37,10 +37,10 @@ func getFailedMailsList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.SendResponse(util.Response{Success: true, Data: m, Error: nil, Meta: map[string]int{
+	util.SendResponse(util.Response{Success: true, Data: m, Error: nil, Meta: map[string]int64{
 		"total":  c,
-		"count":  len(m),
-		"limit":  int(limit),
-		"offset": int(offset),
+		"count":  int64(len(m)),
+		"limit":  limit,
+		"offset": offset,
 	}}, w, http.StatusOK)
 }
