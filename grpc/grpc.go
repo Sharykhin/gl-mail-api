@@ -10,7 +10,6 @@ import (
 	"github.com/Sharykhin/gl-mail-api/entity"
 	"github.com/Sharykhin/gl-mail-grpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 // Server is a reference to a private struct that represent
@@ -64,15 +63,16 @@ func (s server) Count(ctx context.Context) (int64, error) {
 }
 
 func init() {
-	cert := os.Getenv("GRPC_PUBLIC_KEY")
-	cred, err := credentials.NewClientTLSFromFile(cert, "")
-	if err != nil {
-		log.Fatalf("Could not load tls cert: %s", err)
-	}
+	//cert := os.Getenv("GRPC_PUBLIC_KEY")
+	//cred, err := credentials.NewClientTLSFromFile(cert, "")
+	//if err != nil {
+	//	log.Fatalf("Could not load tls cert: %s", err)
+	//}
 
 	address := os.Getenv("GRPC_SERVER_ADDRESS")
 
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(cred))
+	//conn, err := grpc.Dial(address, grpc.WithTransportCredentials(cred))
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Could not connet to a grpc server: %v", err)
 	}
