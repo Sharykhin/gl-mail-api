@@ -33,7 +33,6 @@ Usage:
 1. Go to .docker/golang and .docker/mysql and copy .env.example to .env
 ```bash
 cd .docker/golang && cp .env.example .env
-cd .docker/mysqk && cp .env.example .env
 ```
 
 2. Build images:
@@ -48,6 +47,16 @@ docker-compose up
 
 5. Go to http://localhost:8082
 
+For local env:
+```bash
+JWT_PUBLIC_KEY=jwtRS256.key.pub GRPC_PUBLIC_KEY=server.crt GRPC_SERVER_ADDRESS=localhost:50051 go run main.go
+```
+
+or use Makefile:
+```bash
+make dev
+```
+
 *Examples:*  
 
 Health-check
@@ -57,7 +66,7 @@ curl -XGET http://localhost:8002/ping
 
 Create a new failed mail message
 ```bash
-curl -XPOST -H "Content-Type: application/json" -d '{"action":"register", "payload":{"to":"unknown@mail.com"}, "reason":"no such mailbox"}' http://localhost:8002/failed-mails
+curl -XGET -H "Content-Type: application/json" http://localhost:8002/failed-mails?limit=10&offset=5
 ```
 
 

@@ -3,84 +3,86 @@ package controller
 import (
 	"context"
 
-	//db "github.com/Sharykhin/gl-mail-api/database"
-	"fmt"
-
 	"github.com/Sharykhin/gl-mail-api/contract"
 	"github.com/Sharykhin/gl-mail-api/entity"
+	"github.com/Sharykhin/gl-mail-api/grpc"
 )
 
-// Create creates a new failed mail entity
-func Create(ctx context.Context, fmr entity.FailMailRequest, db contract.StorageKeeper) (*entity.FailMail, error) {
-	// there might be some other stuff ...
-	return db.Create(ctx, fmr)
+// FailMail is a reference to a private struct that implements all necessary methods
+var FailMail failMail
+
+type failMail struct {
+	storage contract.StorageProvider
 }
 
-// GetList returns limiter number of rows with count value
-func GetList(ctx context.Context, db contract.StorageKeeper, limit, offset int) ([]entity.FailMail, int, error) {
+func (c failMail) GetList(ctx context.Context, limit, offset int64) ([]entity.FailMail, int64, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	chMessages := make(chan []entity.FailMail)
-	chCount := make(chan int)
+
+	chFms := make(chan []entity.FailMail)
+	chFmc := make(chan int64)
 	chErr := make(chan error)
 	defer close(chErr)
 
-	var messages []entity.FailMail
-	var count int
+	var fms []entity.FailMail
+	var count int64
 
-	go getList(ctx, db, limit, offset, chMessages, chErr)
-	go countMessages(ctx, db, chCount, chErr)
+	go getList(ctx, chFms, chErr, limit, offset)
+
+	go getCount(ctx, chFmc, chErr)
 
 	for {
-		if chMessages == nil && chCount == nil {
-			break
+		if chFmc == nil && chFms == nil {
+			return fms, count, nil
 		}
-
 		select {
-		case mm, ok := <-chMessages:
+		case receivedFms, ok := <-chFms:
 			if !ok {
-				chMessages = nil
+				chFms = nil
 				continue
 			}
-			messages = mm
-		case c, ok := <-chCount:
+			fms = receivedFms
+		case receivedFmc, ok := <-chFmc:
 			if !ok {
-				chCount = nil
+				chFmc = nil
 				continue
 			}
-			count = c
+			count = receivedFmc
 		case err := <-chErr:
 			cancel()
 			return nil, 0, err
 		}
 	}
-	return messages, count, nil
-
 }
 
-func getList(ctx context.Context, db contract.StorageKeeper, limit, offset int, chMessages chan<- []entity.FailMail, chErr chan<- error) {
-	messages, err := db.GetList(ctx, limit, offset)
+func init() {
+	FailMail = failMail{storage: grpc.Server}
+}
+
+func getList(ctx context.Context, chFms chan<- []entity.FailMail, chErr chan<- error, limit, offset int64) {
+	defer close(chFms)
+	fms, err := grpc.Server.GetList(ctx, limit, offset)
 	if err != nil {
-		if ctx.Err() != context.Canceled {
-			chErr <- fmt.Errorf("could not get list of messages: %v", err)
+		if chErr == nil {
+			return
 		}
+		chErr <- err
+
+	} else {
+		chFms <- fms
 	}
-	chMessages <- messages
-	close(chMessages)
+
 }
 
-func countMessages(ctx context.Context, db contract.StorageKeeper, chCount chan<- int, chErr chan<- error) {
-	c, err := db.Count(ctx)
+func getCount(ctx context.Context, chFmc chan<- int64, chErr chan<- error) {
+	defer close(chFmc)
+	count, err := grpc.Server.Count(ctx)
 	if err != nil {
-		if ctx.Err() != context.Canceled {
-			chErr <- fmt.Errorf("could not count number of rows: %v", err)
+		if chErr == nil {
+			return
 		}
+		chErr <- err
+	} else {
+		chFmc <- count
 	}
-	chCount <- c
-	close(chCount)
 }
-
-// Old implementation
-//func Create(ctx context.Context, mr entity.MessageRequest) (*entity.FailMail, error) {
-//	return db.Create(ctx, mr)
-//}

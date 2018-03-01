@@ -31,53 +31,13 @@ Auth: Role `admin` requires, uses JWT
 Returns a list of failed mails
 
 ```bash
-GET /failed-mails
+GET /failed-mails?limit={number}&offset={number}
 Status: 200 OK
 ```
 
-**Response:**
-
-Headers:
-```bash
-Content-Type application/json
-```
-
- Body:
-```json
-{
-    "success": true,
-    "data": null,
-    "error": null
-}
-```
-
-#### Create a new failed message:
-
-Auth: *will be*
-
-Create a new failed mail row
-```bash
-POST /failed-mails
-Status: 201 Created
-```
-
-**Request**
-
-Headers:
-```bash
-Content-Type application/json
-```
-
-JSON-in payload:
-```json
-{
-	"action":"register",
-	"payload": {
-		"to":"chapal@inbox.ru"
-	},
-	"reason": "failed to sent mail. Mailgun errorL 41245, box is invalid."
-}
-```
+**Filters**:
+- limit - optional | number. How much rows to query
+- offset - optional | number. How much rows to skip
 
 **Response:**
 
@@ -90,15 +50,42 @@ Content-Type application/json
 ```json
 {
     "success": true,
-    "data": {
-        "id": 1,
-        "action": "register",
-        "payload": {
-            "to": "chapal@inbox.ru"
+    "data": [
+        {
+            "id": 32,
+            "action": "",
+            "payload": {
+                "to": "chapal@inbox.ru"
+            },
+            "reason": "test reason",
+            "created_at": "Mon, 26 Feb 2018 16:33:23 UTC",
+            "deleted_at": null
         },
-        "reason": "failed to sent mail. Mailgun errorL 41245, box is invalid.",
-        "created_at": "2018-02-13T09:18:43.576916898+03:00"
-    },
-    "error": null
+        {
+            "id": 33,
+            "action": "test action",
+            "payload": {},
+            "reason": "test reason",
+            "created_at": "Mon, 26 Feb 2018 16:42:23 UTC",
+            "deleted_at": null
+        },
+        {
+            "id": 34,
+            "action": "test action",
+            "payload": {
+                "to": "chapal@inbox.ru"
+            },
+            "reason": "test reason",
+            "created_at": "Mon, 26 Feb 2018 16:42:33 UTC",
+            "deleted_at": null
+        }
+    ],
+    "error": null,
+    "meta": {
+        "count": 3,
+        "limit": 3,
+        "offset": 5,
+        "total": 10
+    }
 }
 ```

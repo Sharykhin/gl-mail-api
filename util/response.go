@@ -11,6 +11,7 @@ type Response struct {
 	Success bool        `json:"success"`
 	Data    interface{} `json:"data"`
 	Error   error       `json:"error"`
+	Meta    interface{} `json:"meta"`
 }
 
 // SendResponse send json response to a client
@@ -23,6 +24,8 @@ func SendResponse(r Response, w http.ResponseWriter, status int) {
 	}
 }
 
+// TODO: just because we want to get error as type we need to duplicate quite a big part of code. Is it ok?
+
 // MarshalJSON implement MarshalJSON interface method to convert error type to string
 func (res Response) MarshalJSON() ([]byte, error) {
 	var err interface{}
@@ -33,9 +36,11 @@ func (res Response) MarshalJSON() ([]byte, error) {
 		Success bool        `json:"success"`
 		Data    interface{} `json:"data"`
 		Error   interface{} `json:"error"`
+		Meta    interface{} `json:"meta"`
 	}{
 		Success: res.Success,
 		Data:    res.Data,
 		Error:   err,
+		Meta:    res.Meta,
 	})
 }
