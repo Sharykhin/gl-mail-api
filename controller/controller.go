@@ -3,8 +3,6 @@ package controller
 import (
 	"context"
 
-	"fmt"
-
 	"github.com/Sharykhin/gl-mail-api/contract"
 	"github.com/Sharykhin/gl-mail-api/entity"
 	"github.com/Sharykhin/gl-mail-api/grpc"
@@ -18,36 +16,73 @@ type failMail struct {
 }
 
 func (c failMail) GetList(ctx context.Context, limit, offset int64) ([]entity.FailMail, int64, error) {
-	fm, err := getList(ctx, limit, offset)
-	if err != nil {
-		return nil, 0, err
-	}
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
-	count, err := getCount(ctx)
-	if err != nil {
-		return nil, 0, err
+	chFms := make(chan []entity.FailMail)
+	chFmc := make(chan int64)
+	chErr := make(chan error)
+	defer close(chErr)
+
+	var fms []entity.FailMail
+	var count int64
+
+	go getList(ctx, chFms, chErr, limit, offset)
+
+	go getCount(ctx, chFmc, chErr)
+
+	for {
+		if chFmc == nil && chFms == nil {
+			return fms, count, nil
+		}
+		select {
+		case receivedFms, ok := <-chFms:
+			if !ok {
+				chFms = nil
+				continue
+			}
+			fms = receivedFms
+		case receivedFmc, ok := <-chFmc:
+			if !ok {
+				chFmc = nil
+				continue
+			}
+			count = receivedFmc
+		case err := <-chErr:
+			cancel()
+			return nil, 0, err
+		}
 	}
-	return fm, count, nil
 }
 
 func init() {
 	FailMail = failMail{storage: grpc.Server}
 }
 
-func getList(ctx context.Context, limit, offset int64) ([]entity.FailMail, error) {
+func getList(ctx context.Context, chFms chan<- []entity.FailMail, chErr chan<- error, limit, offset int64) {
+	defer close(chFms)
 	fms, err := grpc.Server.GetList(ctx, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("could not get list of failed mails: %v", err)
+		if chErr == nil {
+			return
+		}
+		chErr <- err
+
+	} else {
+		chFms <- fms
 	}
 
-	return fms, nil
 }
 
-func getCount(ctx context.Context) (int64, error) {
+func getCount(ctx context.Context, chFmc chan<- int64, chErr chan<- error) {
+	defer close(chFmc)
 	count, err := grpc.Server.Count(ctx)
 	if err != nil {
-		return 0, err
+		if chErr == nil {
+			return
+		}
+		chErr <- err
+	} else {
+		chFmc <- count
 	}
-
-	return count, nil
 }
