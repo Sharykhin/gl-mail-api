@@ -11,8 +11,7 @@ Requirements:
 Technologies:
 -------------
 
-[golang 1.9](https://golang.org/)  
-[mysql 5.7](https://dev.mysql.com)  
+[golang 1.9](https://golang.org/)
 
 Testing:
 -------
