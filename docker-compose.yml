@@ -1,4 +1,9 @@
-version: "2.1"
+version: "3"
+
+networks:
+  api-1:
+    external:
+      name: glmailgrpcserver_grpc-1
 
 services:
   gl-mail-api-golang:
@@ -11,3 +16,5 @@ services:
       - ./.docker/golang/.env
     ports:
       - "8002:8002"
+    networks:
+      - api-1

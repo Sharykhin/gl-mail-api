@@ -76,6 +76,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("Could not connet to a grpc server: %v", err)
 	}
+	fmt.Println("connection is successfull")
 	// TODO: is it ok that we don't close the grpc connection?
 	//defer conn.Close()
 	client := api.NewFailMailClient(conn)

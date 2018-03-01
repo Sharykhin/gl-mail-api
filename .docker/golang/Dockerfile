@@ -8,8 +8,8 @@ RUN go get .
 
 RUN go install github.com/Sharykhin/gl-mail-api
 
-ENTRYPOINT /go/bin/gl-mail-api
+#ENTRYPOINT /go/bin/gl-mail-api
 
-#CMD tail -f /dev/null
+CMD tail -f /dev/null
 
 EXPOSE 8002
