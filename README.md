@@ -26,6 +26,8 @@ Go to [jwt.io](https://jwt.io/)
 Select RS256 ALG and put private and public keys. Increase exp if necessary and put `role` with `admin` value into a payload.
 Copy token and paste it into a request.
 
+For grpc copy server.crt file from grpc server.
+
 Usage:
 ------
 
