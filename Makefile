@@ -15,6 +15,9 @@ serve-dev:
 serve-test:
 	APP_ENV=test JWT_PUBLIC_KEY=jwtRS256.key.pub GRPC_PUBLIC_KEY=server.crt GRPC_SERVER_ADDRESS=localhost:50051 go run main.go
 
+docker-serve:
+	APP_ENV=test JWT_PUBLIC_KEY=jwtRS256.key.pub GRPC_PUBLIC_KEY=server.crt GRPC_SERVER_ADDRESS="gl-mail-grpc-server-golang:50051" go run main.go
+
 prod: build
 	APP_ENV=prod JWT_PUBLIC_KEY=jwtRS256.key.pub GRPC_PUBLIC_KEY=server.crt GRPC_SERVER_ADDRESS=localhost:50051 ./$(BINARY_NAME)
 
