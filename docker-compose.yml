@@ -1,9 +1,8 @@
 version: "3"
 
 networks:
-  api-1:
-    external:
-      name: glmailgrpcserver_grpc-1
+  ethernet:
+    external: true
 
 services:
   gl-mail-api-golang:
@@ -17,4 +16,4 @@ services:
     ports:
       - "8002:8002"
     networks:
-      - api-1
+      - ethernet
