@@ -1,7 +1,7 @@
 Mail API Service:
 ================
 
-Api service that provide various information regarding mails.
+Api service provides information regarding failed mails.
 
 Requirements:
 -------------
@@ -63,7 +63,7 @@ Health-check
 curl -XGET http://localhost:8002/ping
 ```
 
-Create a new failed mail message
+Get a list of failed mails
 ```bash
 curl -XGET -H "Content-Type: application/json" http://localhost:8002/failed-mails?limit=10&offset=5
 ```

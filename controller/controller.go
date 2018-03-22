@@ -8,8 +8,10 @@ import (
 	"github.com/Sharykhin/gl-mail-api/grpc"
 )
 
-// FailMail is a reference to a private struct that implements all necessary methods
-var FailMail failMail
+var (
+	// FailMail exports method for getting list of failed mails
+	FailMail = failMail{storage: grpc.Server}
+)
 
 type failMail struct {
 	storage contract.StorageProvider
@@ -55,9 +57,9 @@ func (c failMail) GetList(ctx context.Context, limit, offset int64) ([]entity.Fa
 	}
 }
 
-func init() {
-	FailMail = failMail{storage: grpc.Server}
-}
+//func init() {
+//	FailMail = failMail{storage: grpc.Server}
+//}
 
 func getList(ctx context.Context, chFms chan<- []entity.FailMail, chErr chan<- error, limit, offset int64) {
 	defer close(chFms)
