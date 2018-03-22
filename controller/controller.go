@@ -13,9 +13,11 @@ var (
 	FailMail = failMail{storage: grpc.Server}
 )
 
-type failMail struct {
-	storage contract.StorageProvider
-}
+type (
+	failMail struct {
+		storage contract.StorageProvider
+	}
+)
 
 func (c failMail) GetList(ctx context.Context, limit, offset int64) ([]entity.FailMail, int64, error) {
 	ctx, cancel := context.WithCancel(ctx)
