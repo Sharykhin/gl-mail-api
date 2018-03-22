@@ -1,4 +1,4 @@
-Mail API Service:
+Mail API Service::
 ================
 
 Api service provides information regarding failed mails.
