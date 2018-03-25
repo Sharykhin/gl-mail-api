@@ -59,10 +59,6 @@ func (c failMail) GetList(ctx context.Context, limit, offset int64) ([]entity.Fa
 	}
 }
 
-//func init() {
-//	FailMail = failMail{storage: grpc.Server}
-//}
-
 func getList(ctx context.Context, chFms chan<- []entity.FailMail, chErr chan<- error, limit, offset int64) {
 	defer close(chFms)
 	fms, err := grpc.Server.GetList(ctx, limit, offset)

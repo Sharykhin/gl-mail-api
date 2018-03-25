@@ -28,6 +28,12 @@ Copy token and paste it into a request.
 
 For grpc copy server.crt file from grpc server.
 
+Attention:
+----------
+By default app environment is set to **dev** and communication
+with grpc server goes with insecure way. To switch to secure
+change *APP_ENV* to **prod**
+
 Usage:
 ------
 

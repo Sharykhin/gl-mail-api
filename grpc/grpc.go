@@ -13,8 +13,11 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-// Server is a reference to a private struct that represent
-var Server server
+var (
+	// Server is a reference to a private struct that represent
+	Server server
+	env    string
+)
 
 type server struct {
 	client api.FailMailClient
@@ -64,24 +67,35 @@ func (s server) Count(ctx context.Context) (int64, error) {
 }
 
 func init() {
-	cert := os.Getenv("GRPC_PUBLIC_KEY")
-	if cert == "" {
-		log.Fatal("Env variable GRPC_PUBLIC_KEY is not specified")
-	}
-	cred, err := credentials.NewClientTLSFromFile(cert, "")
-	if err != nil {
-		log.Fatalf("Could not load tls cert: %s", err)
-	}
 
 	address := os.Getenv("GRPC_SERVER_ADDRESS")
 	if address == "" {
 		log.Fatal("Env variable GRPC_SERVER_ADDRESS is not specified")
 	}
 
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(cred))
-	if err != nil {
-		log.Fatalf("Could not connet to a grpc server: %v", err)
+	var conn *grpc.ClientConn
+	env = os.Getenv("APP_ENV")
+	if env == "prod" {
+		cert := os.Getenv("GRPC_PUBLIC_KEY")
+		if cert == "" {
+			log.Fatal("Env variable GRPC_PUBLIC_KEY is not specified")
+		}
+		cred, err := credentials.NewClientTLSFromFile(cert, "")
+		if err != nil {
+			log.Fatalf("Could not load tls cert: %s", err)
+		}
+		conn, err = grpc.Dial(address, grpc.WithTransportCredentials(cred))
+		if err != nil {
+			log.Fatalf("Could not connet to a grpc server: %v", err)
+		}
+	} else {
+		var err error
+		conn, err = grpc.Dial(address, grpc.WithInsecure())
+		if err != nil {
+			log.Fatalf("Could not connet to a grpc server: %v", err)
+		}
 	}
+
 	fmt.Println("connection is successfull")
 	// TODO: is it ok that we don't close the grpc connection?
 	//defer conn.Close()
